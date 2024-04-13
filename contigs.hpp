@@ -25,7 +25,6 @@ public:
            gc_content(gc_content), start(start),
            rcstart(rcstart), end(end), rcend(rcend), multplty(0) {}
 
-    // Поля класса
     std::string name;     // Имя
     int length;           // Длина в bp
     float cov;            // Покрытие
@@ -53,7 +52,7 @@ std::vector<std::tuple<std::string, std::string>> fasta_generator(const std::str
         std::getline(file, curr_seq_name);
 
         while (std::getline(file, line)) {
-            if (line.empty() || line[0] == '>') {
+            if (line.empty() || line[0] == '>' || line[0] == '@' ) {
                 // Если строка пустая или начинается с '>', это новая последовательность
                 if (!curr_seq.empty()) {
                     sequences.push_back(std::make_tuple(curr_seq_name, curr_seq));

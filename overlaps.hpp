@@ -104,6 +104,10 @@ public:
         return result;
     }
 
+        // Добавим методы begin и end для использования в цикле for
+    auto begin() const { return std::begin(_collection); }
+    auto end() const { return std::end(_collection); }
+
 private:
     // Словарь, хранящий списки перекрытий для каждого контига
     std::unordered_map<ContigIndex, std::vector<Overlap>> _collection;
@@ -128,7 +132,7 @@ int find_overlap_s2s(const std::string& seq1, const std::string& seq2, int mink,
         overlap++;
         i++;
     }
-
+    
     return overlap == 0 ? 0 : (mink + overlap - 1);
 }
 
@@ -152,7 +156,7 @@ int find_overlap_e2s(const std::string& seq1, const std::string& seq2, int mink,
             ovl_len = i;
         }
     }
-
+    
     return ovl_len;
 }
 
