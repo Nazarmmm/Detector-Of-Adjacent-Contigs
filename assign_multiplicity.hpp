@@ -1,76 +1,10 @@
 #pragma once
 
-#include <vector> 
 #include <algorithm>
-#include <cmath>
 
 #include "contigs.hpp"
 #include "overlaps.hpp"
-
-
-class CoverageCalculator {
-public:
-    CoverageCalculator(const ContigCollection& contig_collection) {
-        _coverages = _filter_non_none_covs(contig_collection);
-    }
-
-    float get_min_coverage() const {
-        float min_cov = std::numeric_limits<float>::infinity();
-        for (const auto& cov : _coverages) {
-            min_cov = std::min(min_cov, cov);
-        }
-        return std::isinf(min_cov) ? std::numeric_limits<float>::quiet_NaN() : min_cov;
-    }
-
-    float get_max_coverage() const {
-        float max_cov = -std::numeric_limits<float>::infinity();
-        for (const auto& cov : _coverages) {
-            max_cov = std::max(max_cov, cov);
-        }
-        return std::isinf(max_cov) ? std::numeric_limits<float>::quiet_NaN() : max_cov;
-    }
-
-    float calc_mean_coverage() const {
-        float sum = 0.0f;
-        for (const auto& cov : _coverages) {
-            sum += cov;
-        }
-        return _coverages.empty() ? std::numeric_limits<float>::quiet_NaN() : sum / _coverages.size();
-    }
-
-    float calc_median_coverage() const {
-        std::vector<float> sorted_coverages = _coverages;
-        std::sort(sorted_coverages.begin(), sorted_coverages.end());
-        size_t size = sorted_coverages.size();
-        return size % 2 == 0 ? (sorted_coverages[size / 2 - 1] + sorted_coverages[size / 2]) / 2
-                             : sorted_coverages[size / 2];
-    }
-
-private:
-    std::vector<float> _coverages;
-
-    std::vector<float> _filter_non_none_covs(const ContigCollection& contig_collection) const {
-        std::vector<float> coverages;
-        for (const auto& contig : contig_collection) {
-            if (contig.cov != std::numeric_limits<float>::quiet_NaN()) {
-                coverages.push_back(contig.cov);
-            }
-        }
-        return coverages;
-    }
-};
-
-bool is_start_match(const Overlap& ovl) {
-    // Function returns true if overlap `ovl` is associated with start.
-    return (ovl.terminus_i == START && ovl.terminus_j == END)
-           || (ovl.terminus_i == START && ovl.terminus_j == RCSTART);
-}
-
-bool is_end_match(const Overlap& ovl) {
-    // Function returns true if overlap `ovl` is associated with end.
-    return (ovl.terminus_i == END && ovl.terminus_j == START)
-           || (ovl.terminus_i == END && ovl.terminus_j == RCEND);
-}
+#include "output.hpp"
 
 float _calc_multiplty_by_coverage(float curr_coverage, float first_contig_coverage) {
     return curr_coverage / first_contig_coverage;

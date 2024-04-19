@@ -136,17 +136,29 @@ ContigCollection get_contig_collection(const std::string& filepath, int maxk) {
         float cov = 0;
         float gc_content = calc_gc_сontent(contig_seq);
 
-        
-        contig_collection.push_back(Contig(
-            contig_name,
-            contig_seq.length(),
-            cov,
-            gc_content,
-            contig_seq.substr(0, maxk), // start
-            _rc(contig_seq.substr(0, maxk)), // rcstart
-            contig_seq.substr(contig_seq.length() - maxk, maxk), // end
-            _rc(contig_seq.substr(contig_seq.length() - maxk, maxk)) // rcend
-        ));
+        if (contig_seq.length() >= maxk){
+            contig_collection.push_back(Contig(
+                contig_name,
+                contig_seq.length(),
+                cov,
+                gc_content,
+                contig_seq.substr(0, maxk), // start
+                _rc(contig_seq.substr(0, maxk)), // rcstart
+                contig_seq.substr(contig_seq.length() - maxk), // end
+                _rc(contig_seq.substr(contig_seq.length() - maxk)) // rcend
+            ));
+        } else {
+            contig_collection.push_back(Contig(
+                contig_name,
+                contig_seq.length(),
+                cov,
+                gc_content,
+                contig_seq.substr(0, maxk), // start
+                _rc(contig_seq.substr(0, maxk)), // rcstart
+                contig_seq, // end
+                _rc(contig_seq) // rcend
+            ));
+        }
     }
     return contig_collection;
 }

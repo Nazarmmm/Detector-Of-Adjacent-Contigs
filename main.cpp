@@ -48,6 +48,10 @@ int main() {
     std::string outdpath = "output";
     write_summary(contig_collection, overlap_collection, filepath, outdpath);
 
+    write_adjacency_table(contig_collection, overlap_collection, outdpath);
+
+    write_full_log(contig_collection, overlap_collection, outdpath);
+
     // Зафиксируем конечное время
     auto end_time = std::chrono::high_resolution_clock::now();
 

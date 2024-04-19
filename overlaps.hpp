@@ -151,7 +151,7 @@ int find_overlap_e2s(const std::string& seq1, const std::string& seq2, int mink,
 
     int ovl_len = 0;
 
-    for (int i = mink; i <= maxk; ++i) {
+    for (int i = mink; i <= std::min(maxk, static_cast<int>(seq1.length())); i++) {
         if (seq1.substr(seq1.length() - i) == seq2.substr(0, i)) {
             ovl_len = i;
         }
@@ -196,7 +196,8 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
     int num_contigs = contig_collection.size();
 
     // Итерация по контигам и сравнение их терминов с другими терминами
-    for (int i = 0; i < num_contigs; ++i) {
+    
+    for (ContigIndex i = 0; i < num_contigs; i++) {
         // Пропускаем контиги, длина которых меньше mink
         if (contig_collection[i].length <= mink) {
             std::cout << "\r" << i + 1 << "/" << num_contigs;
@@ -207,7 +208,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
         int ovl_len = find_overlap_e2s(contig_collection[i].end,
                                         contig_collection[i].start,
                                         mink, maxk);
-        if (ovl_len != 0 && ovl_len != contig_collection[i].length) {
+        if (ovl_len > 0 && ovl_len < contig_collection[i].length) {
             overlap_collection.add_overlap(i, Overlap(i, END, i, START, ovl_len));
             overlap_collection.add_overlap(i, Overlap(i, START, i, END, ovl_len));
         }
@@ -222,9 +223,9 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
         }
 
         // Сравнение текущего контига с контигами от i+1 до N
-        for (int j = i + 1; j < num_contigs; ++j) {
+        for (ContigIndex j = i + 1; j < num_contigs; j++) {
             // Сравнение начала i-го с концом j-го
-            ovl_len = find_overlap_e2s(contig_collection[j].end,
+            ovl_len = find_overlap_e2s(contig_collection[j].end,                    ///+++++++++++++
                                         contig_collection[i].start,
                                         mink, maxk);
             if (ovl_len != 0) {
@@ -242,7 +243,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
             }
 
             // Сравнение начала i-го с обратно-комплементарным началом j-го
-            ovl_len = find_overlap_e2s(contig_collection[j].rcstart,
+            ovl_len = find_overlap_e2s(contig_collection[j].rcstart,                       //+++++++++++++++
                                         contig_collection[i].start,
                                         mink, maxk);
             if (ovl_len != 0) {
@@ -260,7 +261,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
             }
 
             // Сравнение начала i-го с началом j-го
-            ovl_len = find_overlap_s2s(contig_collection[i].start,
+            ovl_len = find_overlap_s2s(contig_collection[i].start,                        //+++++++++++++++++++++
                                         contig_collection[j].start,
                                         mink, maxk);
             if (ovl_len != 0) {
@@ -269,7 +270,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
             }
 
             // Сравнение конца i-го с концом j-го
-            ovl_len = find_overlap_e2e(contig_collection[i].end,
+            ovl_len = find_overlap_e2e(contig_collection[i].end,                          //++++++++++++++++
                                         contig_collection[j].end,
                                         mink, maxk);
             if (ovl_len != 0) {
@@ -278,7 +279,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
             }
 
             // Сравнение начала i-го с обратно-комплементарным концом j-го
-            ovl_len = find_overlap_s2s(contig_collection[i].start,
+            ovl_len = find_overlap_s2s(contig_collection[i].start,                        //++++++++++++++++++++
                                         contig_collection[j].rcend,
                                         mink, maxk);
             if (ovl_len != 0) {
@@ -287,7 +288,7 @@ OverlapCollection detect_adjacent_contigs(const ContigCollection& contig_collect
             }
 
             // Сравнение конца i-го с обратно-комплементарным началом j-го
-            ovl_len = find_overlap_e2e(contig_collection[i].end,
+            ovl_len = find_overlap_e2e(contig_collection[i].end,                         //++++++++++++++++++++++
                                         contig_collection[j].rcstart,
                                         mink, maxk);
             if (ovl_len != 0) {
