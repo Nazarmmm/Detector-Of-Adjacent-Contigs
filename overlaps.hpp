@@ -32,7 +32,7 @@ public:
     int ovl_len; // длина перекрытия
 
     // Переопределение оператора преобразования в строку (аналог __repr__ в Python)
-    std::string to_string() const {
+    std::string to_string() const {                                                 /////////Не используется (для тестов)
         return "<" + std::to_string(contig_i) + "-" + std::to_string(terminus_i) +
                "; " + std::to_string(contig_j) + "-" + std::to_string(terminus_j) +
                "; len=" + std::to_string(ovl_len) + ">";
@@ -91,7 +91,7 @@ public:
     }
 
     // Переопределение оператора преобразования в строку
-    std::string to_string() const {
+    std::string to_string() const {                      /////////Не используется (для тестов)
         std::string result = "{";
         for (const auto& pair : _collection) {
             result += std::to_string(pair.first) + ": [";

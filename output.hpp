@@ -111,34 +111,40 @@ float calc_lq_coef(const ContigCollection& contig_collection,
     float total_dead_ends = 0;
 
     // Iterate over contigs
-    int num_dead_ends;
+    int num_dead_ends=0;
     // Подсчет перекрытий, ассоциированных с началом
-    int start_is_not_dead;
+    int start_is_not_dead = 0;
     // Подсчет перекрытий, ассоциированных с концом
-    int end_is_not_dead;
+    int end_is_not_dead = 0;
 
-    for (ContigIndex i = 0; i < contig_collection.size(); i++) {
-            
+    for (ContigIndex i = 0; i < contig_collection.size(); ++i) { 
         for (const auto& overlap : overlap_collection[i]) {
-
-            start_is_not_dead += is_start_match(overlap);
-            
-            end_is_not_dead += is_end_match(overlap);
+            if(is_start_match(overlap)){
+                start_is_not_dead = 1;
+                break;
+            }
+            if(is_end_match(overlap)){
+                end_is_not_dead = 1;
+                break;
+            }
         }
         
-        std::cout <<"rb "<< start_is_not_dead<<std::endl;
-        std::cout <<"r "<< end_is_not_dead<<std::endl;
-
-        if(start_is_not_dead!=0){start_is_not_dead=1;}
-        if(end_is_not_dead!=0){end_is_not_dead=1;}
+        //std::cout <<"s"<< start_is_not_dead<<std::endl;
+        //std::cout <<"e "<< end_is_not_dead<<std::endl;
 
         // Calculate number of dead ends of the current contig
         num_dead_ends = num_contig_termini - start_is_not_dead - end_is_not_dead;
         // Add to `total_dead_ends`
         total_dead_ends += num_dead_ends;
-        std::cout <<"rbffffff "<< total_dead_ends<<std::endl;
+        
+        //std::cout <<i<<" tde "<< total_dead_ends<<" nde "<< num_dead_ends<<std::endl;
+
+        start_is_not_dead = 0;
+        end_is_not_dead = 0;
+        /*if(i==0){
+            total_dead_ends=0;
+        }*/
     }
-    //std::cout <<"rbffffff "<< total_dead_ends<<std::endl;
     // Total number of termini taking account of multiplicity
     int total_termini = num_contig_termini * contig_collection.size();
     // Calculate the LQ coefficient
@@ -161,7 +167,7 @@ int calc_exp_genome_size(const ContigCollection& contig_collection,
     std::vector<Overlap> end_ovls;
 
     // Iterate over contigs
-    for (ContigIndex i = 0; i < contig_collection.size(); i++) {
+    for (ContigIndex i = 0; i < contig_collection.size(); ++i) {
 
         for (const Overlap& ovl : overlap_collection[i]) {
             if (is_start_match(ovl)) {
@@ -372,23 +378,28 @@ std::string _get_overlaps_str_for_log(const OverlapCollection& overlap_collectio
     }
 }
 
-void write_adjacency_table(const ContigCollection& contig_collection,
+void write_adjacency_table_and_full_log(const ContigCollection& contig_collection,
                            const OverlapCollection& overlap_collection,
                            const std::string& outdpath) {
     // Сформировать путь к выходному файлу TSV
     std::string adj_table_fpath = outdpath + "_combinator_adjacent_contigs.tsv";
 
-    std::cout << "Writing adjacency table to `" << adj_table_fpath << "`" << std::endl;
+
+    // Сформировать путь к файлу полного журнала
+    std::string log_fpath = outdpath + "_combinator_full_matching_log.txt";
+
+    std::cout << "Writing adjacency table to `" << adj_table_fpath << "`"<< std::endl << "Writing full matching log to `" << log_fpath << "`"  << std::endl;
 
     // Открыть выходной файл для записи
-    std::ofstream outfile(adj_table_fpath);
-    if (!outfile.is_open()) {
+    std::ofstream outfile_table(adj_table_fpath);
+    std::ofstream outfile_log(log_fpath);
+    if (!outfile_table.is_open() || !outfile_log.is_open()) {
         std::cerr << "Error: Unable to open output file" << std::endl;
         return;
     }
 
     // Записать заголовок таблицы
-    outfile << "#\tContig name\tLength\tCoverage\tGC(%)\tMultiplicity\tAnnotation\tStart\tEnd\n";
+    outfile_table << "#\tContig name\tLength\tCoverage\tGC(%)\tMultiplicity\tAnnotation\tStart\tEnd\n";
 
     std::string wrk_str;
 
@@ -397,58 +408,39 @@ void write_adjacency_table(const ContigCollection& contig_collection,
         const Contig& contig = contig_collection[i];
 
         // Порядковый номер и имя
-        outfile << i + 1 << "\t" << contig.name << "\t";
+        outfile_table << i + 1 << "\t" << contig.name << "\t";
 
         // Длина
-        outfile << contig.length << "\t";
+        outfile_table << contig.length << "\t";
 
         // Покрытие
         wrk_str = (contig.cov == -1) ? "-" : std::to_string(contig.cov);
-        outfile << wrk_str << "\t";
+        outfile_table << wrk_str << "\t";
 
         // Содержание GC в контиге
-        outfile << contig.gc_content << "\t";
+        outfile_table << contig.gc_content << "\t";
 
         // Множество копий
-        outfile << contig.multplty << "\t";
+        outfile_table << contig.multplty << "\t";
 
         // Пустая колонка для аннотации
-        outfile << "\t";
+        outfile_table << "\t";
 
         // Информация о найденных смежностях
         // Колонка "Start"
         wrk_str = _get_overlaps_str_for_table(overlap_collection, contig_collection, i, "s");
-        outfile << wrk_str << "\t";
+        outfile_table << wrk_str << "\t";
 
         // Колонка "End"
         wrk_str = _get_overlaps_str_for_table(overlap_collection, contig_collection, i, "e");
-        outfile << wrk_str << "\n";
-    }
-}
+        outfile_table << wrk_str << "\n";
 
-void write_full_log(const ContigCollection& contig_collection,
-                    const OverlapCollection& overlap_collection,
-                    const std::string& outdpath) {
-    // Сформировать путь к файлу полного журнала
-    std::string log_fpath = outdpath + "_combinator_full_matching_log.txt";
 
-    std::cout << "Writing full matching log to `" << log_fpath << "`" << std::endl;
-
-    // Открыть файл для записи
-    std::ofstream outfile(log_fpath);
-    if (!outfile.is_open()) {
-        std::cerr << "Error: Unable to open output file" << std::endl;
-        return;
-    }
-
-    std::string wrk_str;
-
-    // Записать информацию о найденных смежностях
-    for (ContigIndex i = 0; i < contig_collection.size(); ++i) {
         // Записать совпадения, с которыми связан начало текущего контига
         wrk_str = _get_overlaps_str_for_log(overlap_collection, contig_collection, i);
         if (!wrk_str.empty()) {
-            outfile << wrk_str << "\n";
+            outfile_log << wrk_str << "\n";
         }
     }
 }
+
