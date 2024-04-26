@@ -6,6 +6,7 @@
 #include "overlaps.hpp"
 #include "output.hpp"
 
+
 float _calc_multiplty_by_coverage(float curr_coverage, float first_contig_coverage) {
     return curr_coverage / first_contig_coverage;
 }

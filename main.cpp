@@ -13,7 +13,7 @@ int main() {
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::string filepath = "testg.fasta";
-    int maxk=100;
+    int maxk=50;
     int mink=5;
     
     // Получение коллекции контигов
@@ -38,9 +38,18 @@ int main() {
     /*for (const auto& pair : overlap_collection) {
         std::cout << "Key: " << pair.first << ", Value: ";
         for (const auto& overlap : pair.second) {
-            std::cout << overlap.to_string() << " ";
+            std::cout << overlap.to_string() << " "<< std::endl;
         }
         std::cout << std::endl;
+    }*/
+    /*std::cout << "bbbb" << std::endl;
+    int a=0;
+    for (ContigIndex i = 0; i < contig_collection.size(); ++i) { 
+        for (const auto& overlap : overlap_collection[i]) {
+            std::cout << "t_i " << overlap.terminus_i << " t_j " << overlap.terminus_j << std::endl;
+            a++;
+        }
+         std::cout << a << std::endl;
     }*/
 
     assign_multiplicity(contig_collection, overlap_collection);
@@ -60,7 +69,6 @@ int main() {
 
     // Выведем время выполнения в миллисекундах
     std::cout << "Execution time: " << duration.count() << " milliseconds" << std::endl;
-
 
     return 0;
 }

@@ -176,7 +176,7 @@ int find_overlap_e2e(const std::string& seq1, const std::string& seq2, int mink,
     int i = mink;
     int overlap = 0;
 
-    while (seq1.substr(seq1.length() - i) == seq2.substr(seq2.length() - i) && i <= maxk) {
+    while (i <= maxk && seq1.length() >= i && seq2.length() >= i && seq1.substr(seq1.length() - i) == seq2.substr(seq2.length() - i)) {
         overlap++;
         i++;
     }

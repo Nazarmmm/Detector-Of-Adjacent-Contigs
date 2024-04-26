@@ -110,8 +110,6 @@ float calc_lq_coef(const ContigCollection& contig_collection,
     // Total number of dead ends taking account of multiplicity
     float total_dead_ends = 0;
 
-    // Iterate over contigs
-    int num_dead_ends=0;
     // Подсчет перекрытий, ассоциированных с началом
     int start_is_not_dead = 0;
     // Подсчет перекрытий, ассоциированных с концом
@@ -119,31 +117,24 @@ float calc_lq_coef(const ContigCollection& contig_collection,
 
     for (ContigIndex i = 0; i < contig_collection.size(); ++i) { 
         for (const auto& overlap : overlap_collection[i]) {
+            
             if(is_start_match(overlap)){
                 start_is_not_dead = 1;
-                break;
             }
             if(is_end_match(overlap)){
                 end_is_not_dead = 1;
-                break;
             }
         }
         
-        //std::cout <<"s"<< start_is_not_dead<<std::endl;
-        //std::cout <<"e "<< end_is_not_dead<<std::endl;
+        
 
         // Calculate number of dead ends of the current contig
-        num_dead_ends = num_contig_termini - start_is_not_dead - end_is_not_dead;
+        total_dead_ends += num_contig_termini - start_is_not_dead - end_is_not_dead;
         // Add to `total_dead_ends`
-        total_dead_ends += num_dead_ends;
         
-        //std::cout <<i<<" tde "<< total_dead_ends<<" nde "<< num_dead_ends<<std::endl;
 
         start_is_not_dead = 0;
         end_is_not_dead = 0;
-        /*if(i==0){
-            total_dead_ends=0;
-        }*/
     }
     // Total number of termini taking account of multiplicity
     int total_termini = num_contig_termini * contig_collection.size();
@@ -158,7 +149,6 @@ int calc_exp_genome_size(const ContigCollection& contig_collection,
     // In this variable, total length of overlapping regions will be stored
     int total_overlap_len = 0;
 
-    ContigIndex i = 0; 
     std::vector<Contig> contig; 
 
     // Get start-associated overlaps
@@ -239,7 +229,7 @@ void write_summary(const ContigCollection& contig_collection, const OverlapColle
 
     outfile << "Sum of contig lengths: " << calc_sum_contig_lengths(contig_collection) << " bp\n";
 
-    outfile << "Expected length of the genome: " << calc_exp_genome_size(contig_collection, overlap_collection) << " bp\n";
+    //outfile << "Expected length of the genome: " << calc_exp_genome_size(contig_collection, overlap_collection) << " bp\n";
     
     CoverageCalculator cov_calc(contig_collection);
 
