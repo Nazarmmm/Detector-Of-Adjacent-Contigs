@@ -59,6 +59,9 @@ int main() {
 
     write_adjacency_table_and_full_log(contig_collection, overlap_collection, outdpath);
 
+    write_genbank(contig_collection, overlap_collection, outdpath);
+
+
     //write_full_log(contig_collection, overlap_collection, outdpath);
 
     // Зафиксируем конечное время

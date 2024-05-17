@@ -7,6 +7,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream> 
+#include <iomanip> // для форматирования вывода
 
 #include "contigs.hpp"
 #include "overlaps.hpp"
@@ -159,12 +160,12 @@ int calc_exp_genome_size(const ContigCollection& contig_collection,
     // Iterate over contigs
     for (ContigIndex i = 0; i < contig_collection.size(); ++i) {
 
-        for (const Overlap& ovl : overlap_collection[i]) {
-            if (is_start_match(ovl)) {
-                start_ovls.push_back(ovl);
+        for (const auto& overlap : overlap_collection[i]) {
+            if (is_start_match(overlap)) {
+                start_ovls.push_back(overlap);
             }
-            if (is_end_match(ovl)) {
-                end_ovls.push_back(ovl);
+            if (is_end_match(overlap)) {
+                end_ovls.push_back(overlap);
             }
         }
 
@@ -229,7 +230,7 @@ void write_summary(const ContigCollection& contig_collection, const OverlapColle
 
     outfile << "Sum of contig lengths: " << calc_sum_contig_lengths(contig_collection) << " bp\n";
 
-    //outfile << "Expected length of the genome: " << calc_exp_genome_size(contig_collection, overlap_collection) << " bp\n";
+    outfile << "Expected length of the genome: " << calc_exp_genome_size(contig_collection, overlap_collection) << " bp\n";
     
     CoverageCalculator cov_calc(contig_collection);
 
@@ -434,3 +435,54 @@ void write_adjacency_table_and_full_log(const ContigCollection& contig_collectio
     }
 }
 
+
+
+void write_genbank(const ContigCollection& contig_collection, const OverlapCollection& overlap_collection, const std::string& outdpath) {
+    // Сформировать путь к выходному файлу GenBank
+    std::string genbank_fpath = outdpath + "_annotated_genbank.gtf";
+    std::cout << "Writing GenBank file to `" << genbank_fpath << "`" << std::endl;
+
+    // Открыть выходной файл для записи
+    std::ofstream outfile(genbank_fpath);
+    if (!outfile.is_open()) {
+        std::cerr << "Error: Unable to open file for writing: " << genbank_fpath << std::endl;
+        return;
+    }
+
+    // Записать заголовок файла GenBank
+    outfile << "LOCUS       ___Exported_from_AssemblyTool\n";
+    outfile << "DEFINITION  ___Genomic sequence data.\n";
+    outfile << "ACCESSION   ___N/A\n";
+    outfile << "VERSION     ___N/A\n";
+    outfile << "KEYWORDS    ___.\n";
+    outfile << "SOURCE      ___Synthetic construct\n";
+    outfile << "  ORGANISM  ___Synthetic construct\n";
+    outfile << "            ___Unclassified.\n";
+    outfile << "FEATURES             ___Location/Qualifiers\n";
+
+    // Записать информацию о контигах
+    for (ContigIndex i = 0; i < contig_collection.size(); ++i) {
+        outfile << "     contig          " << contig_collection[i].name << "\n";
+        outfile << "                     /note=\"length: " << contig_collection[i].length << " bp\"\n";
+        outfile << "                     /note=\"coverage: " << (contig_collection[i].cov == -1 ? "N/A" : std::to_string(contig_collection[i].cov)) << "\"\n";
+        outfile << "                     /note=\"GC content: " << std::fixed << std::setprecision(2) << contig_collection[i].gc_content << "%\"\n";
+        outfile << "                     /note=\"multiplicity: " << contig_collection[i].multplty << "\"\n";
+        
+        // Добавить аннотации, если они есть
+        /*if (!contig.annotation.empty()) {
+            outfile << "                     /note=\"" << contig.annotation << "\"\n";
+        }*/
+        
+        // Extract overlaps for the current contig
+        const std::vector<Overlap>& overlaps = overlap_collection[i];
+
+        // Если необходимо, можно добавить информацию о перекрытиях
+        for (const Overlap& ovl : overlaps) {
+            outfile << "     overlap         " << ovl.ovl_len << " bp\n";
+            outfile << "                     /note=\"with contig " << contig_collection[ovl.contig_j].name << "\"\n";
+        }
+    }
+
+    // Закрыть файл
+    outfile.close();
+}
