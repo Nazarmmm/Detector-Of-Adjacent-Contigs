@@ -210,7 +210,7 @@ int calc_exp_genome_size(const ContigCollection& contig_collection,
 void write_summary(const ContigCollection& contig_collection, const OverlapCollection& overlap_collection,
                    const std::string& infpath, const std::string& outdpath) {
     // Путь к файлу сводки
-    std::string summary_fpath = outdpath;
+    std::string summary_fpath = outdpath + "_summary.txt";
     std::cout << "Writing summary to `" << summary_fpath << "`" << std::endl;
 
     // Открытие файла на запись
@@ -373,11 +373,11 @@ void write_adjacency_table_and_full_log(const ContigCollection& contig_collectio
                            const OverlapCollection& overlap_collection,
                            const std::string& outdpath) {
     // Сформировать путь к выходному файлу TSV
-    std::string adj_table_fpath = outdpath + "_combinator_adjacent_contigs.tsv";
+    std::string adj_table_fpath = outdpath + "__adjacent_contigs.tsv";
 
 
     // Сформировать путь к файлу полного журнала
-    std::string log_fpath = outdpath + "_combinator_full_matching_log.txt";
+    std::string log_fpath = outdpath + "_full_matching_log.txt";
 
     std::cout << "Writing adjacency table to `" << adj_table_fpath << "`"<< std::endl << "Writing full matching log to `" << log_fpath << "`"  << std::endl;
 
